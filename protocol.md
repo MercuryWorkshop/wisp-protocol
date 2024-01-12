@@ -1,9 +1,9 @@
 # Wisp - A Lightweight Multiplexing Websocket Proxy Protocol
 
-Draft 1 - written by [@ading2210](https://github.com/ading2210)
+Draft 2 - written by [@ading2210](https://github.com/ading2210)
 
 ## About
-Wisp is designed to be a low-overhead, easy to implement protocol for proxying multiple TCP sockets over a single websocket connection. As it is only intended to carry TCP traffic, it is a lot simpler than alternatives such as penguin-rs.
+Wisp is designed to be a low-overhead, easy to implement protocol for proxying multiple TCP/UDP sockets over a single websocket connection. Wisp is simpler and has better error handling abilities compared to alternatives such as penguin-rs.
 
 ## Packet format
 | Field Name  | Field Type | Notes                                         |
@@ -19,15 +19,18 @@ Each packet type has a different format for the payload, which is detailed below
 
 ### `0x01` - CONNECT
 #### Payload Format
-| Field Name           | Field Type | Notes                                    |
-|----------------------|------------|------------------------------------------|
-| Destination Port     | `uint16_t` | Destination TCP port for the new stream. |
-| Destination Hostname | `char[]`   | Destination hostname, in a UTF-8 string. |
+| Field Name           | Field Type | Notes                                                  |
+|----------------------|------------|--------------------------------------------------------|
+| Stream Type          | `uint8_t`  | Whether the new stream should use a TCP or UDP socket. |
+| Destination Port     | `uint16_t` | Destination TCP/UDP port for the new stream.           |
+| Destination Hostname | `char[]`   | Destination hostname, in a UTF-8 string.               |
 
 #### Behavior
-The client needs to send a CONNECT packet to the server to create a new stream under the same websocket. The stream ID chosen by the client at this point will be associated with this stream for all future messages. If creating the stream fails during this process, the server needs to immediately send a CLOSE packet with a relevant reason.
+The client needs to send a CONNECT packet to the server to create a new stream under the same websocket. The stream ID chosen by the client at this point will be associated with this stream for all future messages. When the server receives this packet, it must validate this information, and if the payload is invalid, a CLOSE packet must be sent.
 
-On receiving a CONNECT packet, the server must try to establish a TCP socket to the specified hostname and port. If this fails, the server must send a CLOSE packet with the reason.
+Once the payload has been validated, the server must immediately try to establish a TCP/UDP socket to the specified hostname and port. If this fails, the server must send a CLOSE packet with the reason. To reduce overall delay, the client can begin sending data before the any CONTINUE packet has been received from the server.
+
+The stream type field determines whether the connection uses TCP or UDP. `0x01` in this field means TDP, and `0x02` means UDP.
 
 ### `0x02` - DATA
 #### Payload Format
@@ -36,11 +39,24 @@ On receiving a CONNECT packet, the server must try to establish a TCP socket to 
 | Stream Payload | `char[]`   | The data which is sent to and from the destination server. |
 
 #### Behavior
-Any DATA packets sent from the client to the server must be proxied to the TCP socket associated with the stream ID of the packet.
+Any DATA packets sent from the client to the server must be proxied to the TCP/UDP socket associated with the stream ID of the packet. On the server, the received payload must be buffered before being sent to the TCP/UDP socket in order to handle congestion. The size of this send buffer is predetermined and must be the same for every stream. 
 
-Any DATA packets sent from the server to the client must be interpreted as coming from the TCP socket associated with the stream ID of the packet.
+Any DATA packets sent from the server to the client must be interpreted as coming from the TCP/UDP socket associated with the stream ID of the packet.
 
-### `0x03` - CLOSE
+### `0x03` - CONTINUE
+#### Payload Format
+| Field Name       | Field Type | Notes                                                                    |
+|------------------|------------|--------------------------------------------------------------------------|
+| Buffer Remaining | `uint32_t` | The number of packets that the server can buffer for the current stream. |
+
+#### Behavior
+If the associated stream is a UDP socket, then CONTINUE packets must not be sent, and the client does not keep track of any buffer for the stream.
+
+When the client receives a CONTINUE packet from the server, it must store the received buffer size. When sending a DATA packet, this value should be decremented by 1 on the client. Once the remaining buffer size reaches zero, the client cannot send any more DATA packets, until it receives another CONTINUE packet which resets this value.
+
+When the server's own send buffer for the associated TCP socket has emptied, the server must send another CONTINUE packet to inform the client it can begin sending data again. The server should regularly send CONTINUE packets before this point to ensure minimal delays when receiving data from the client. 
+
+### `0x04` - CLOSE
 #### Payload format
 | Field Name   | Field Type | Notes                                  |
 |--------------|------------|----------------------------------------|
@@ -84,6 +100,8 @@ It is up to the server implementation to interpret the prefix. It may be ignored
 
 ### Establishing a Websocket Connection
 The client must establish the connection by performing a standard websocket handshake. The `Sec-WebSocket-Protocol` header must be set to `wisp-v1`. If this protocol header is mismatched between the server and the client, the connection cannot proceed.
+
+Immediately after a websocket connection is established, the server must send a CONTINUE packet containing the initial buffer size for each stream. The stream ID for this packet must be set to 0. The client must wait for this CONTINUE packet to be received before beginning any communications. The purpose of this packet is to ensure that the client does not have to wait for a CONTINUE packet for the creation of each stream, reducing the overall delay.
 
 ### Querying Server Information
 The sever may optionally implement an information query feature, in which an HTTP GET request to the same aforementioned websocket URL will return some information about the server. The format of the returned data needs to be a JSON string. 
