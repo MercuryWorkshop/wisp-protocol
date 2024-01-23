@@ -1,6 +1,6 @@
 # Wisp - A Lightweight Multiplexing Websocket Proxy Protocol
 
-Draft 2 - written by [@ading2210](https://github.com/ading2210)
+Draft 3 - written by [@ading2210](https://github.com/ading2210)
 
 ## About
 Wisp is designed to be a low-overhead, easy to implement protocol for proxying multiple TCP/UDP sockets over a single websocket connection. Wisp is simpler and has better error handling abilities compared to alternatives such as penguin-rs.
@@ -30,7 +30,7 @@ The client needs to send a CONNECT packet to the server to create a new stream u
 
 Once the payload has been validated, the server must immediately try to establish a TCP/UDP socket to the specified hostname and port. If this fails, the server must send a CLOSE packet with the reason. To reduce overall delay, the client can begin sending data before the any CONTINUE packet has been received from the server.
 
-The stream type field determines whether the connection uses TCP or UDP. `0x01` in this field means TDP, and `0x02` means UDP.
+The stream type field determines whether the connection uses TCP or UDP. `0x01` in this field means TDP, and `0x02` means UDP. UDP support is optional for both the server and the client.
 
 ### `0x02` - DATA
 #### Payload Format
@@ -54,7 +54,7 @@ If the associated stream is a UDP socket, then CONTINUE packets must not be sent
 
 When the client receives a CONTINUE packet from the server, it must store the received buffer size. When sending a DATA packet, this value should be decremented by 1 on the client. Once the remaining buffer size reaches zero, the client cannot send any more DATA packets, until it receives another CONTINUE packet which resets this value.
 
-When the server's own send buffer for the associated TCP socket has emptied, the server must send another CONTINUE packet to inform the client it can begin sending data again. The server should regularly send CONTINUE packets before this point to ensure minimal delays when receiving data from the client. 
+The server must send another CONTINUE packet when it has received the same number of packets from the client as its own buffer size. The server should regularly send CONTINUE packets before this point to ensure minimal delays when receiving data from the client. 
 
 ### `0x04` - CLOSE
 #### Payload format
@@ -64,6 +64,8 @@ When the server's own send buffer for the associated TCP socket has emptied, the
 
 #### Behavior
 Any CLOSE packets sent from either the server or the client must immediately close the associated stream and TCP socket. The close reason in the payload doesn't affect this behavior, but may provide extra information which is useful for debugging.
+
+For UDP streams, the server should automatically close each stream after around 60 seconds of inactivity. 
 
 #### Client/Server Close Reasons
 - `0x01` - Reason unspecified or unknown. Returning a more specific reason should be preferred.
@@ -83,7 +85,6 @@ Any CLOSE packets sent from either the server or the client must immediately clo
 - `0x81` - The client has encountered an unexpected error and is unable to receive any more data. 
 
 ## HTTP Behavior
-
 Since the entire protocol takes place over websockets, a few rules need to be in place to ensure that an HTTP connection can be upgraded successfully.
 
 ### Server Architecture
@@ -102,8 +103,3 @@ It is up to the server implementation to interpret the prefix. It may be ignored
 The client must establish the connection by performing a standard websocket handshake. The `Sec-WebSocket-Protocol` header must be set to `wisp-v1`. If this protocol header is mismatched between the server and the client, the connection cannot proceed.
 
 Immediately after a websocket connection is established, the server must send a CONTINUE packet containing the initial buffer size for each stream. The stream ID for this packet must be set to 0. The client must wait for this CONTINUE packet to be received before beginning any communications. The purpose of this packet is to ensure that the client does not have to wait for a CONTINUE packet for the creation of each stream, reducing the overall delay.
-
-### Querying Server Information
-The sever may optionally implement an information query feature, in which an HTTP GET request to the same aforementioned websocket URL will return some information about the server. The format of the returned data needs to be a JSON string. 
-
-The fields in this endpoint are to be decided, but they should include info such as some statistics about server load, the server maintainers, and the protocol version.
