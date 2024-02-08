@@ -5,6 +5,7 @@ For the protocol specifications, see [`protocol.md`](https://github.com/MercuryW
 
 ## Server Implementations:
 - **[wisp-server-python](https://github.com/MercuryWorkshop/wisp-server-python)** - by [@ading2210](https://github.com/ading2210)
+- **[wisp-server-node](https://github.com/MercuryWorkshop/wisp-server-node)** - by [@ading2210](https://github.com/ProgrammerIn-wonderland)
 - [WispServerCpp](https://github.com/FoxMoss/WispServerCpp) - by [@FoxMoss](https://github.com/FoxMoss)
 
 ## Client Implementations:
