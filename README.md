@@ -5,12 +5,13 @@ For the protocol specifications, see [`protocol.md`](https://github.com/MercuryW
 
 ## Server Implementations:
 - **[wisp-server-python](https://github.com/MercuryWorkshop/wisp-server-python)** - by [@ading2210](https://github.com/ading2210)
-- [wisp-server-rust](https://github.com/MercuryWorkshop/epoxy-tls/tree/multiplexed/server) - by [@r58Playz](https://github.com/r58Playz)
 - [WispServerCpp](https://github.com/FoxMoss/WispServerCpp) - by [@FoxMoss](https://github.com/FoxMoss)
 
 ## Client Implementations:
 - **[wisp-client-js](https://github.com/MercuryWorkshop/wisp-client-js)** - by [@ading2210](https://github.com/ading2210)
-- [wisp-client-rust](https://github.com/MercuryWorkshop/epoxy-tls/tree/multiplexed/client) - by [@r58Playz](https://github.com/r58Playz)
+
+## Library Implementations:
+- **[wisp-mux](https://crates.io/crates/wisp-mux)** - by [@r58Playz](https://github.com/r58Playz)
 
 ## Copyright:
 This repository is licensed under the [Creative Commons Attribution 4.0 International](https://github.com/MercuryWorkshop/wisp-protocol/blob/main/LICENSE) license. The implementations listed above use different licenses.
