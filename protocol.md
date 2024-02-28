@@ -1,6 +1,6 @@
 # Wisp - A Lightweight Multiplexing Websocket Proxy Protocol
 
-Draft 3 - written by [@ading2210](https://github.com/ading2210)
+Draft 4 - written by [@ading2210](https://github.com/ading2210)
 
 ## About
 Wisp is designed to be a low-overhead, easy to implement protocol for proxying multiple TCP/UDP sockets over a single websocket connection. Wisp is simpler and has better error handling abilities compared to alternatives such as penguin-rs.
@@ -43,6 +43,8 @@ Any DATA packets sent from the client to the server must be proxied to the TCP/U
 
 Any DATA packets sent from the server to the client must be interpreted as coming from the TCP/UDP socket associated with the stream ID of the packet.
 
+For TCP streams, the server must buffer any packets received from the client in a FIFO queue, and it must keep a separate buffer for each TCP stream.
+
 ### `0x03` - CONTINUE
 #### Payload Format
 | Field Name       | Field Type | Notes                                                                    |
@@ -54,7 +56,7 @@ If the associated stream is a UDP socket, then CONTINUE packets must not be sent
 
 When the client receives a CONTINUE packet from the server, it must store the received buffer size. When sending a DATA packet, this value should be decremented by 1 on the client. Once the remaining buffer size reaches zero, the client cannot send any more DATA packets, until it receives another CONTINUE packet which resets this value.
 
-The server must send another CONTINUE packet when it has received the same number of packets from the client as its own buffer size. The server should regularly send CONTINUE packets before this point to ensure minimal delays when receiving data from the client. 
+The server must send another CONTINUE packet when it has received the same number of packets from the client as its own maximum buffer size. The server should regularly send CONTINUE packets before this point to ensure minimal delays when receiving data from the client. 
 
 ### `0x04` - CLOSE
 #### Payload format
@@ -100,6 +102,6 @@ Meanwhile a Wisp endpoint would look like this: `ws://example.com/customprefix/`
 It is up to the server implementation to interpret the prefix. It may be ignored, or used for gatekeeping in order to establish password-based authentication.
 
 ### Establishing a Websocket Connection
-The client must establish the connection by performing a standard websocket handshake. The `Sec-WebSocket-Protocol` header must be set to `wisp-v1`. If this protocol header is mismatched between the server and the client, the connection cannot proceed.
+The client must establish the connection by performing a standard websocket handshake. The `Sec-WebSocket-Protocol` header does not need to be set.
 
-Immediately after a websocket connection is established, the server must send a CONTINUE packet containing the initial buffer size for each stream. The stream ID for this packet must be set to 0. The client must wait for this CONTINUE packet to be received before beginning any communications. The purpose of this packet is to ensure that the client does not have to wait for a CONTINUE packet for the creation of each stream, reducing the overall delay.
+Immediately after a websocket connection is established, the server must send a CONTINUE packet containing the initial buffer size for each stream. The stream ID for this packet must be set to 0, which corresponds to the version of the Wisp protocol (0 means Wisp v1). The client must wait for this CONTINUE packet to be received before beginning any communications. The purpose of this packet is to ensure that the client does not have to wait for a CONTINUE packet for the creation of each stream, reducing the overall delay.
