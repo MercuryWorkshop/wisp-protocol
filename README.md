@@ -6,8 +6,8 @@ For the protocol specifications, see [`protocol.md`](https://github.com/MercuryW
 ## Server Implementations:
 - **[wisp-server-python](https://github.com/MercuryWorkshop/wisp-server-python)** - by [@ading2210](https://github.com/ading2210)
 - **[wisp-server-node](https://github.com/MercuryWorkshop/wisp-server-node)** - by [@ProgrammerIn-wonderland](https://github.com/ProgrammerIn-wonderland)
+- [epoxy-server](https://github.com/MercuryWorkshop/epoxy-tls/tree/multiplexed/server) (Rust) - by [@r58Playz](https://github.com/r58Playz)
 - [WispServerCpp](https://github.com/FoxMoss/WispServerCpp) - by [@FoxMoss](https://github.com/FoxMoss)
-- [wisp-mux](https://crates.io/crates/wisp-mux) (Rust) - by [@r58Playz](https://github.com/r58Playz)
 
 ## Client Implementations:
 - **[wisp-client-js](https://github.com/MercuryWorkshop/wisp-client-js)** - by [@ading2210](https://github.com/ading2210)
