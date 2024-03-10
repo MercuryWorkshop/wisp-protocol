@@ -1,6 +1,6 @@
 # Wisp - A Lightweight Multiplexing Websocket Proxy Protocol
 
-Draft 4 - written by [@ading2210](https://github.com/ading2210)
+Draft 5 - written by [@ading2210](https://github.com/ading2210) and [@r58Playz](https://github.com/r58Playz)
 
 ## About
 Wisp is designed to be a low-overhead, easy to implement protocol for proxying multiple TCP/UDP sockets over a single websocket connection. Wisp is simpler and has better error handling abilities compared to alternatives such as penguin-rs.
@@ -86,6 +86,21 @@ For UDP streams, the server should automatically close each stream after around 
 #### Client Only Close Reasons
 - `0x81` - The client has encountered an unexpected error and is unable to receive any more data. 
 
+### `0x05` - PROTOCOLS
+#### Payload Format
+| Field Name          | Field Type | Notes                                  |
+|---------------------|------------|----------------------------------------|
+| Protocol Extensions | `char[]`   | A UTF-8 string of protocol extensions. |
+
+#### Behavior
+The stream ID of this packet is used as the protocol version.
+
+Protocol extensions must not have spaces and must be separated by commas. Protocol extension data must be placed after the protocol extension name and must be a valid UTF-8 string that does not contain spaces, equal signs, or commas.
+
+An example of a protocol extension field is `protocol_extension_1=protocol_extension_1_data,protocol_extension_2`. 
+
+If the server does not support this set of protocol extensions, it must close the connection.
+
 ## HTTP Behavior
 Since the entire protocol takes place over websockets, a few rules need to be in place to ensure that an HTTP connection can be upgraded successfully.
 
@@ -104,4 +119,4 @@ It is up to the server implementation to interpret the prefix. It may be ignored
 ### Establishing a Websocket Connection
 The client must establish the connection by performing a standard websocket handshake. The `Sec-WebSocket-Protocol` header does not need to be set.
 
-Immediately after a websocket connection is established, the server must send a CONTINUE packet containing the initial buffer size for each stream. The stream ID for this packet must be set to 0, which corresponds to the version of the Wisp protocol (0 means Wisp v1). The client must wait for this CONTINUE packet to be received before beginning any communications. The purpose of this packet is to ensure that the client does not have to wait for a CONTINUE packet for the creation of each stream, reducing the overall delay.
+Immediately after a websocket connection is established, the server must send a CONTINUE packet containing the initial buffer size for each stream. The stream ID for this packet must be set to 5, which corresponds to the version of this document. The purpose of this packet is to ensure that the client does not have to wait for a CONTINUE packet for the creation of each stream, reducing the overall delay. The client must then send a PROTOCOLS packet to the server containing the protocol extensions it wants to use, if the stream ID sent by the server is greater than or equal to 5. If the stream ID sent by the server is not greater than or equal to 5, the client must assume the server does not support any protocol extensions and must not send a PROTOCOLS packet. If the server does not support the set of protocol extensions the client sends, it must close the connection. The client may begin communications after the PROTOCOLS packet has been sent.
