@@ -7,14 +7,20 @@ For the protocol specifications, see [`protocol.md`](https://github.com/MercuryW
 - **[wisp-server-python](https://github.com/MercuryWorkshop/wisp-server-python)** - by [@ading2210](https://github.com/ading2210)
 - **[wisp-server-node](https://github.com/MercuryWorkshop/wisp-server-node)** - by [@ProgrammerIn-wonderland](https://github.com/ProgrammerIn-wonderland)
 - [WispServerCpp](https://github.com/FoxMoss/WispServerCpp) - by [@FoxMoss](https://github.com/FoxMoss)
+- [wisp-mux](https://crates.io/crates/wisp-mux) (Rust) - by [@r58Playz](https://github.com/r58Playz)
 
 ## Client Implementations:
 - **[wisp-client-js](https://github.com/MercuryWorkshop/wisp-client-js)** - by [@ading2210](https://github.com/ading2210)
+- [wisp-mux](https://crates.io/crates/wisp-mux) (Rust) - by [@r58Playz](https://github.com/r58Playz)
 
-## Library Implementations:
-- **[wisp-mux](https://crates.io/crates/wisp-mux)** - by [@r58Playz](https://github.com/r58Playz)
+## Software Using Wisp:
+- [libcurl.js](https://github.com/ading2210/libcurl.js) - A port of libcurl to WebAssembly, for proxying HTTPS requests from the browser with full TLS encryption
+- [epoxy-tls](https://github.com/MercuryWorkshop/epoxy-tls) - An encrypted proxy for browser javascript, written in Rust.
+- [Ultraviolet](https://github.com/titaniumnetwork-dev/Ultraviolet/) - A sophisticated web proxy, which uses either libcurl.js or epoxy. 
 
 ## Copyright:
 This repository is licensed under the [Creative Commons Attribution 4.0 International](https://github.com/MercuryWorkshop/wisp-protocol/blob/main/LICENSE) license. The implementations listed above use different licenses.
 
-![creative commons banner](https://mirrors.creativecommons.org/presskit/buttons/88x31/png/by.png)
+The Wisp protocol specifications were written by [@ading2210](https://github.com/ading2210).
+
+<img src="https://mirrors.creativecommons.org/presskit/buttons/88x31/png/by.png" alt="creative commons banner" height="64px"/>
