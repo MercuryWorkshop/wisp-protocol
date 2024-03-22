@@ -17,6 +17,7 @@ For the protocol specifications, see [`protocol.md`](https://github.com/MercuryW
 - [libcurl.js](https://github.com/ading2210/libcurl.js) - A port of libcurl to WebAssembly, for proxying HTTPS requests from the browser with full TLS encryption
 - [epoxy-tls](https://github.com/MercuryWorkshop/epoxy-tls) - An encrypted proxy for browser javascript, written in Rust.
 - [Ultraviolet](https://github.com/titaniumnetwork-dev/Ultraviolet/) - A sophisticated web proxy, which uses either libcurl.js or epoxy. 
+- [Whisper](https://github.com/MercuryWorkshop/Whisper) - A client for Wisp that exposes the connection over a TUN device.
 
 ## Copyright:
 This repository is licensed under the [Creative Commons Attribution 4.0 International](https://github.com/MercuryWorkshop/wisp-protocol/blob/main/LICENSE) license. The implementations listed above use different licenses.

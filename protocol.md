@@ -1,6 +1,6 @@
 # Wisp - A Lightweight Multiplexing Websocket Proxy Protocol
 
-Version 1 - written by [@ading2210](https://github.com/ading2210)
+Version 1.1 - written by [@ading2210](https://github.com/ading2210)
 
 ## About
 Wisp is designed to be a low-overhead, easy to implement protocol for proxying multiple TCP/UDP sockets over a single websocket connection. Wisp is simpler and has better error handling abilities compared to alternatives such as penguin-rs.
@@ -66,8 +66,6 @@ The server must send another CONTINUE packet when it has received the same numbe
 
 #### Behavior
 Any CLOSE packets sent from either the server or the client must immediately close the associated stream and TCP socket. The close reason in the payload doesn't affect this behavior, but may provide extra information which is useful for debugging.
-
-For UDP streams, the server should automatically close each stream after around 60 seconds of inactivity. 
 
 #### Client/Server Close Reasons
 - `0x01` - Reason unspecified or unknown. Returning a more specific reason should be preferred.
