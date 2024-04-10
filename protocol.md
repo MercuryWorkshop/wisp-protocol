@@ -149,6 +149,6 @@ After the initial CONTINUE packet is sent, the server must send an INFO packet c
 
 The client must wait for the CONTINUE packet and the server's INFO packet to be received before beginning any communications. The client must then send an INFO packet to the server describing itself and the extensions it supports.
 
-If either side does not send an INFO packet, the connection may still proceed, but version 1 of the protocol is used. If there are any other critical compatibility issues detected by either party during the handshake, the connection should be immediately closed with a CLOSE packet with reason `0x04` and a stream ID of 0.
+If either side does not send an INFO packet within 5 seconds, the connection may still proceed, but version 1 of the protocol is used. If there are any other critical compatibility issues detected by either party during the handshake, the websocket connection should be immediately closed.
 
 After these steps have been performed, regular communications can begin between the client and server. Only extensions that both sides support may be used.
