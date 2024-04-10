@@ -1,6 +1,6 @@
 # Wisp - A Lightweight Multiplexing Websocket Proxy Protocol
 
-Version 1.1 - written by [@ading2210](https://github.com/ading2210)
+Version 2, draft 1 - written by [@ading2210](https://github.com/ading2210)
 
 ## About
 Wisp is designed to be a low-overhead, easy to implement protocol for proxying multiple TCP/UDP sockets over a single websocket connection. Wisp is simpler and has better error handling abilities compared to alternatives such as penguin-rs.
@@ -12,7 +12,7 @@ Wisp is designed to be a low-overhead, easy to implement protocol for proxying m
 | Stream ID   | `uint32_t` | Random stream ID assigned by the client.      |
 | Payload     | `char[]`   | Payload takes up the rest of the packet.      |
 
-Every packet must follow this format regardless of the type. Note that all data types are little-endian. 
+Every packet must follow this format regardless of the type. Note that all data types are little-endian. Additionally, the stream ID of 0 is reserved for the initial handshake and must not be used elsewhere.
 
 ## Packet Types
 Each packet type has a different format for the payload, which is detailed below.
@@ -59,7 +59,7 @@ When the client receives a CONTINUE packet from the server, it must store the re
 The server must send another CONTINUE packet when it has received the same number of packets from the client as its own maximum buffer size. The server should regularly send CONTINUE packets before this point to ensure minimal delays when receiving data from the client. 
 
 ### `0x04` - CLOSE
-#### Payload format
+#### Payload Format
 | Field Name   | Field Type | Notes                                  |
 |--------------|------------|----------------------------------------|
 | Close Reason | `uint8_t`  | The reason for closing the connection. |
@@ -71,6 +71,7 @@ Any CLOSE packets sent from either the server or the client must immediately clo
 - `0x01` - Reason unspecified or unknown. Returning a more specific reason should be preferred.
 - `0x02` - Voluntary stream closure, which would equate to one side resetting the connection.
 - `0x03` - Unexpected stream closure due to a network error.
+- `0x04` - Incompatible extensions. This will only be used during the initial handshake.
 
 #### Server Only Close Reasons
 - `0x41` - Stream creation failed due to invalid information. This could be sent if the destination was a reserved address or the port is invalid. 
@@ -83,6 +84,45 @@ Any CLOSE packets sent from either the server or the client must immediately clo
 
 #### Client Only Close Reasons
 - `0x81` - The client has encountered an unexpected error and is unable to receive any more data. 
+
+### `0x05` - INFO
+#### Payload Format
+| Field Name         | Field Type | Notes                                               |
+|--------------------|------------|-----------------------------------------------------|
+| Major Wisp Version | `uint8_t`  | The major version of the latest supported protocol. |
+| Minor Wisp Version | `uint8_t`  | The minor version of the latest supported protocol. |
+| Extension Data     | `char[]`   | Data about the supported protocol extensions.       |
+
+#### Behavior
+When a Wisp connection is first established, both the server must send an INFO packet describing the protocol extensions that it supports. The extension data is represented as an array of extension metadata entries, the format of which is indicated below. If an extension is missing from this packet, it is assumed to not be supported.
+
+The version numbers must be set to the latest protocol version supported by both the client and server. This will match the [Semantic Versioning](https://semver.org/) format.
+
+## Protocol Extensions
+
+### Common Format
+| Field Name         | Field Type | Notes                                                                        |
+|--------------------|------------|------------------------------------------------------------------------------|
+| Extension ID       | `uint8_t`  | The ID of the protocol extension.                                            |
+| Payload Length     | `uint32_t` | The length of the payload for the extension metadata.                        |
+| Extension Metadata | `char[]`   | A custom byte array which has information about the status of the extension. |
+
+### `0x01` - UDP
+The presence of this extension indicates whether or not the client or server implementation supports UDP. There is no payload.
+
+### `0x02` - Password Authentication
+This extension adds password-based authentication to Wisp. A payload is required for this feature.
+
+#### Server Message
+The server does not need to send a payload for this feature. The presence of this extension indicates that a username and password is required.
+
+#### Client Message
+| Field Name      | Field Type | Notes                                    |
+|-----------------|------------|------------------------------------------|
+| Username Length | `uint8_t`  | The length of the username string.       |
+| Password Length | `uint16_t` | The length of the password string.       |
+| Username String | `char[]`   | A UTF-8 encoded string for the username. |
+| Password String | `char[]`   | A UTF-8 encoded string for the password. |
 
 ## HTTP Behavior
 Since the entire protocol takes place over websockets, a few rules need to be in place to ensure that an HTTP connection can be upgraded successfully.
@@ -97,9 +137,18 @@ For example, a wsproxy endpoint might look like this: `ws://example.com/custompr
 
 Meanwhile a Wisp endpoint would look like this: `ws://example.com/customprefix/`
 
-It is up to the server implementation to interpret the prefix. It may be ignored, or used for gatekeeping in order to establish password-based authentication.
+It is up to the server implementation to interpret the prefix. It may be ignored, or used for gatekeeping in order to establish basic password-based authentication.
 
 ### Establishing a Websocket Connection
 The client must establish the connection by performing a standard websocket handshake. The `Sec-WebSocket-Protocol` header does not need to be set.
 
-Immediately after a websocket connection is established, the server must send a CONTINUE packet containing the initial buffer size for each stream. The stream ID for this packet must be set to 0, which corresponds to the version of the Wisp protocol (0 means Wisp v1). The client must wait for this CONTINUE packet to be received before beginning any communications. The purpose of this packet is to ensure that the client does not have to wait for a CONTINUE packet for the creation of each stream, reducing the overall delay.
+### Handshake Steps
+Immediately after a websocket connection is established, the server must send a CONTINUE packet containing the initial buffer size for each stream. The stream ID for this packet must be set to 0. 
+
+After the initial CONTINUE packet is sent, the server must send an INFO packet containing information about the server itself. This includes information about the latest supported Wisp version and a list of supported protocols.
+
+The client must wait for the CONTINUE packet and the server's INFO packet to be received before beginning any communications. The client must then send an INFO packet to the server describing itself and the extensions it supports.
+
+If either side does not send an INFO packet, the connection may still proceed, but version 1 of the protocol is used. If there are any other critical compatibility issues detected by either party during the handshake, the connection should be immediately closed with a CLOSE packet with reason `0x04` and a stream ID of 0.
+
+After these steps have been performed, regular communications can begin between the client and server. Only extensions that both sides support may be used.
