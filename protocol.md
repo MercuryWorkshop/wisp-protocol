@@ -122,7 +122,7 @@ The server does not need to send a payload for this feature. The presence of thi
 | Username Length | `uint8_t`  | The length of the username string.                           |
 | Password Length | `uint16_t` | The length of the password string.                           |
 | Username String | `char[]`   | A non-null terminated UTF-8 encoded string for the username. |
-| Password String | `char[]`   | A non-null UTF-8 encoded string for the password.  |
+| Password String | `char[]`   | A non-null terminated UTF-8 encoded string for the password.  |
 
 ## HTTP Behavior
 Since the entire protocol takes place over websockets, a few rules need to be in place to ensure that an HTTP connection can be upgraded successfully.
