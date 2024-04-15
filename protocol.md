@@ -1,6 +1,6 @@
 # Wisp - A Lightweight Multiplexing Websocket Proxy Protocol
 
-Version 2, draft 1 - written by [@ading2210](https://github.com/ading2210)
+Version 2.0.0, draft 2 - written by [@ading2210](https://github.com/ading2210) and to a lesser extent [@foxmoss](https://github.com/FoxMoss) and @r58
 
 ## About
 Wisp is designed to be a low-overhead, easy to implement protocol for proxying multiple TCP/UDP sockets over a single websocket connection. Wisp is simpler and has better error handling abilities compared to alternatives such as penguin-rs.
@@ -94,7 +94,7 @@ Any CLOSE packets sent from either the server or the client must immediately clo
 | Extension Data     | `char[]`   | Data about the supported protocol extensions.       |
 
 #### Behavior
-When a Wisp connection is first established, both the server must send an INFO packet describing the protocol extensions that it supports. The extension data is represented as an array of extension metadata entries, the format of which is indicated below. If an extension is missing from this packet, it is assumed to not be supported.
+When a Wisp connection is first established, both the server and client must send an INFO packet describing the protocol extensions that it supports. The extension data is represented as an array of extension metadata entries, the format of which is indicated below. If an extension is missing from this packet, it is assumed to not be supported.
 
 The version numbers must be set to the latest protocol version supported by both the client and server. This will match the [Semantic Versioning](https://semver.org/) format.
 
@@ -117,12 +117,12 @@ This extension adds password-based authentication to Wisp. A payload is required
 The server does not need to send a payload for this feature. The presence of this extension indicates that a username and password is required.
 
 #### Client Message
-| Field Name      | Field Type | Notes                                    |
-|-----------------|------------|------------------------------------------|
-| Username Length | `uint8_t`  | The length of the username string.       |
-| Password Length | `uint16_t` | The length of the password string.       |
-| Username String | `char[]`   | A UTF-8 encoded string for the username. |
-| Password String | `char[]`   | A UTF-8 encoded string for the password. |
+| Field Name      | Field Type | Notes                                                        |
+|-----------------|------------|--------------------------------------------------------------|
+| Username Length | `uint8_t`  | The length of the username string.                           |
+| Password Length | `uint16_t` | The length of the password string.                           |
+| Username String | `char[]`   | A non-null terminated UTF-8 encoded string for the username. |
+| Password String | `char[]`   | A non-null UTF-8 encoded string for the password.  |
 
 ## HTTP Behavior
 Since the entire protocol takes place over websockets, a few rules need to be in place to ensure that an HTTP connection can be upgraded successfully.
@@ -149,6 +149,6 @@ After the initial CONTINUE packet is sent, the server must send an INFO packet c
 
 The client must wait for the CONTINUE packet and the server's INFO packet to be received before beginning any communications. The client must then send an INFO packet to the server describing itself and the extensions it supports.
 
-If either side does not send an INFO packet, the connection may still proceed, but version 1 of the protocol is used. If there are any other critical compatibility issues detected by either party during the handshake, the connection should be immediately closed with a CLOSE packet with reason `0x04` and a stream ID of 0.
+If either side does not send an INFO packet, the connection may still proceed, but version 1 of the protocol is used. If there are any other critical compatibility issues detected by either party during the handshake, the connection should be immediately closed with a CLOSE packet with reason `0x04` and a stream ID of 0. A connection can still proceed if there are conflicts, provided both parties have the error handling capabilities to dispose of any packets defined by an incompatible extension.
 
 After these steps have been performed, regular communications can begin between the client and server. Only extensions that both sides support may be used.
