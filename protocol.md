@@ -124,6 +124,16 @@ The server does not need to send a payload for this feature. The presence of thi
 | Username String | `char[]`   | A UTF-8 encoded string for the username. |
 | Password String | `char[]`   | A UTF-8 encoded string for the password. |
 
+### `0x03` - Round Trip for Stream Creation
+This extension adds a confirmation for stream creation, to provide better compatibility for apps that assume the stream is ready to send data upon creation. There is no payload.
+
+When a stream is created, the server must reply with a packet of type `0x06` with the stream ID of the new stream and the following contents:
+| Field Name    | Field Type | Notes                                                                                          |
+|---------------|------------|------------------------------------------------------------------------------------------------|
+| Stream Status | `uint8_t`  | If stream creation has errored, a valid close packet close code. Otherwise, a value of `0x00`. |
+
+The client must listen for this packet and only send data after this packet has been recieved and the stream status is `0x00`. If the stream status is not `0x00`, the client must treat this status as a close code and assume the stream has been closed.
+
 ## HTTP Behavior
 Since the entire protocol takes place over websockets, a few rules need to be in place to ensure that an HTTP connection can be upgraded successfully.
 
