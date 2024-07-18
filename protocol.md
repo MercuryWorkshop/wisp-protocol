@@ -1,11 +1,14 @@
 # Wisp - A Lightweight Multiplexing Websocket Proxy Protocol
 
-Version 2, draft 1 - written by [@ading2210](https://github.com/ading2210)
+Version 2.0, draft 2 - written by [@ading2210](https://github.com/ading2210)
+
+> [!WARNING]
+> This version of the protocol is still a draft. Do not use it in production.
 
 ## About
 Wisp is designed to be a low-overhead, easy to implement protocol for proxying multiple TCP/UDP sockets over a single websocket connection. Wisp is simpler and has better error handling abilities compared to alternatives such as penguin-rs.
 
-## Packet format
+## Packet Format
 | Field Name  | Field Type | Notes                                         |
 |-------------|------------|-----------------------------------------------|
 | Packet Type | `uint8_t`  | The packet type, covered in the next section. |
@@ -30,7 +33,7 @@ The client needs to send a CONNECT packet to the server to create a new stream u
 
 Once the payload has been validated, the server must immediately try to establish a TCP/UDP socket to the specified hostname and port. If this fails, the server must send a CLOSE packet with the reason. To reduce overall delay, the client can begin sending data before the any CONTINUE packet has been received from the server.
 
-The stream type field determines whether the connection uses TCP or UDP. `0x01` in this field means TCP, and `0x02` means UDP. UDP support is optional for both the server and the client.
+The stream type field determines whether the connection uses TCP or UDP. `0x01` in this field means TCP, and `0x02` means UDP. UDP support is mandated for both the server and the client.
 
 ### `0x02` - DATA
 #### Payload Format
@@ -94,7 +97,7 @@ Any CLOSE packets sent from either the server or the client must immediately clo
 | Extension Data     | `char[]`   | Data about the supported protocol extensions.       |
 
 #### Behavior
-When a Wisp connection is first established, both the server must send an INFO packet describing the protocol extensions that it supports. The extension data is represented as an array of extension metadata entries, the format of which is indicated below. If an extension is missing from this packet, it is assumed to not be supported.
+When a Wisp connection is first established, both the server and client must send an INFO packet describing the protocol extensions that it supports. The extension data is represented as an array of extension metadata entries, the format of which is indicated below. If an extension is missing from this packet, it is assumed to not be supported.
 
 The version numbers must be set to the latest protocol version supported by both the client and server. This will match the [Semantic Versioning](https://semver.org/) format.
 
@@ -106,9 +109,6 @@ The version numbers must be set to the latest protocol version supported by both
 | Extension ID       | `uint8_t`  | The ID of the protocol extension.                                            |
 | Payload Length     | `uint32_t` | The length of the payload for the extension metadata.                        |
 | Extension Metadata | `char[]`   | A custom byte array which has information about the status of the extension. |
-
-### `0x01` - UDP
-The presence of this extension indicates whether or not the client or server implementation supports UDP. There is no payload.
 
 ### `0x02` - Password Authentication
 This extension adds password-based authentication to Wisp. A payload is required for this feature.
