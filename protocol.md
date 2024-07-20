@@ -33,7 +33,7 @@ The client needs to send a CONNECT packet to the server to create a new stream u
 
 Once the payload has been validated, the server must immediately try to establish a TCP/UDP socket to the specified hostname and port. If this fails, the server must send a CLOSE packet with the reason. To reduce overall delay, the client can begin sending data before the any CONTINUE packet has been received from the server.
 
-The stream type field determines whether the connection uses TCP or UDP. `0x01` in this field means TCP, and `0x02` means UDP. UDP support is mandated for both the server and the client.
+The stream type field determines whether the connection uses TCP or UDP. `0x01` in this field means TCP, and `0x02` means UDP. UDP support is optional for both the server and the client.
 
 ### `0x02` - DATA
 #### Payload Format
@@ -109,6 +109,9 @@ The version numbers must be set to the latest protocol version supported by both
 | Extension ID       | `uint8_t`  | The ID of the protocol extension.                                            |
 | Payload Length     | `uint32_t` | The length of the payload for the extension metadata.                        |
 | Extension Metadata | `char[]`   | A custom byte array which has information about the status of the extension. |
+
+### `0x01` - UDP
+The presence of this extension indicates whether or not the client or server implementation supports UDP. There is no payload.
 
 ### `0x02` - Password Authentication
 This extension adds password-based authentication to Wisp. A payload is required for this feature.
