@@ -1,6 +1,6 @@
 # Wisp - A Lightweight Multiplexing Websocket Proxy Protocol
 
-Version 2.0, draft 2 - written by [@ading2210](https://github.com/ading2210)
+Version 2.0, draft 3 - written by [@ading2210](https://github.com/ading2210)
 
 > [!WARNING]
 > This version of the protocol is still a draft. Do not use it in production.
@@ -85,6 +85,10 @@ Any CLOSE packets sent from either the server or the client must immediately clo
 - `0x48` - Stream destination address/domain is intentionally blocked by the proxy server.
 - `0x49` - Connection throttled by the server.
 
+#### Close Reasons Specified by Extensions:
+- `0xc0` - Authentication failed due to invalid username/password.
+- `0xc1` - Authentication failed due to invalid signature.
+
 #### Client Only Close Reasons
 - `0x81` - The client has encountered an unexpected error and is unable to receive any more data. 
 
@@ -107,7 +111,7 @@ The version numbers must be set to the latest protocol version supported by both
 | Field Name         | Field Type | Notes                                                                        |
 |--------------------|------------|------------------------------------------------------------------------------|
 | Extension ID       | `uint8_t`  | The ID of the protocol extension.                                            |
-| Payload Length     | `uint32_t` | The length of the payload for the extension metadata.                        |
+| Payload Length     | `uint32_t` | The length of the payload for the extension metadata, in bytes.              |
 | Extension Metadata | `char[]`   | A custom byte array which has information about the status of the extension. |
 
 ### `0x01` - UDP
@@ -115,6 +119,8 @@ The presence of this extension indicates whether or not the client or server imp
 
 ### `0x02` - Password Authentication
 This extension adds password-based authentication to Wisp. A payload is required for this feature.
+
+Once the server receives the username and password sent by the client, it will check if these credentials match. If they do, the connection will proceed as normal, but if they do not, the connection will be closed by sending a CLOSE packet with a reason of `0xc0`, then closing the underlying websocket.
 
 #### Server Message
 The server does not need to send a payload for this feature. The presence of this extension indicates that a username and password is required.
@@ -126,6 +132,44 @@ The server does not need to send a payload for this feature. The presence of thi
 | Password Length | `uint16_t` | The length of the password string.       |
 | Username String | `char[]`   | A UTF-8 encoded string for the username. |
 | Password String | `char[]`   | A UTF-8 encoded string for the password. |
+
+### `0x03` - Public/Private Key Authentication
+This extension adds public/private key authentication to Wisp. A payload is required for this feature. The presence of this extension on the server message means that the server allows the usage of key authentication. 
+
+During the handshake, the server sends a list of supported signature algorithms and a challenge which consists of random bytes. The length of the challenge may vary, but it should be around 512 bits. 
+
+When the client receives this, it will select an algorithm to use, and sign the provided challenge using its private key. The client then sends back the SHA-512 hash of the public key which corresponds to the private key used, as well as the signature. 
+
+When the server receives the response from the client, it must verify the signature using the the public keys it has stored. If the verification is successful for one of the public keys allowed by the server, no more action is needed. If it fails for all of them, the connection must be closed immediately by sending a CLOSE packet with a reason of `0xc1`, then closing the underlying websocket.
+
+Currently, the only supported signature algorithm is Ed25519, and this is represented by a bit mask of `0b00000001` in the payload.
+
+#### Server Message
+| Field Name           | Field Type | Notes                                                                                                 |
+|----------------------|------------|-------------------------------------------------------------------------------------------------------|
+| Supported Algorithms | `uint8_t`  | A bit mask representing a list of signature algorithms supported by the server.                       |
+| Challenge Data       | `char[]`   | The randomly generated challenge data. The length of this may vary and fills the rest of the payload. |
+
+#### Client Message
+| Field Name          | Field Type | Notes                                                                                                   |
+|---------------------|------------|---------------------------------------------------------------------------------------------------------|
+| Selected Algorithm  | `uint8_t`  | A bit mask representing the signature algorithm that was selected by the client.                        |
+| Public Key Hash     | `char[64]` | A SHA-512 hash of the public key used. This is always 64 bytes long.                                    |
+| Challenge Signature | `char[]`   | A cryptographic signature generated using the client's private key. This fills the rest of the payload. |
+
+### `0x04` - Server MOTD
+This extension allows the server to specify a MOTD (a welcome message) to the client. The client can then display this message to the user. The purpose of this is to provide a mechanism for the server to make the user aware of any limitations imposed on the client, such as rate limits and block lists, as well other info.
+
+### Server Message
+| Field Name  | Field Type | Notes                               |
+|-------------|------------|-------------------------------------|
+| MOTD String | `char[]`   | A UTF-8 string containing the MOTD. |
+
+### Client Message
+The client does not need to send a payload.
+
+### Note on Authentication Behavior:
+When both extensions for password and key authentication are sent by the server, the client must assume that authentication is required but may pick which method to use. In the client message, the client only provides one response for the selected authentication method. If only a single extension for password or key authentication is sent by the server, it means that authentication is mandatory with that method only. If the server does not send any extensions for authentication, it means that no authentication is required at all.
 
 ## HTTP Behavior
 Since the entire protocol takes place over websockets, a few rules need to be in place to ensure that an HTTP connection can be upgraded successfully.
