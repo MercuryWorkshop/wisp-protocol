@@ -1,6 +1,6 @@
 # Wisp - A Lightweight Multiplexing Websocket Proxy Protocol
 
-Version 2.0, draft 3 - written by [@ading2210](https://github.com/ading2210)
+Version 2.0, draft 4 - written by [@ading2210](https://github.com/ading2210)
 
 > [!WARNING]
 > This version of the protocol is still a draft. Do not use it in production.
@@ -85,12 +85,13 @@ Any CLOSE packets sent from either the server or the client must immediately clo
 - `0x48` - Stream destination address/domain is intentionally blocked by the proxy server.
 - `0x49` - Connection throttled by the server.
 
+#### Client Only Close Reasons
+- `0x81` - The client has encountered an unexpected error and is unable to receive any more data. 
+
 #### Close Reasons Specified by Extensions:
 - `0xc0` - Authentication failed due to invalid username/password.
 - `0xc1` - Authentication failed due to invalid signature.
-
-#### Client Only Close Reasons
-- `0x81` - The client has encountered an unexpected error and is unable to receive any more data. 
+- `0xc2` - Authentication required but the client did not provide credentials.
 
 ### `0x05` - INFO
 #### Payload Format
@@ -118,12 +119,14 @@ The version numbers must be set to the latest protocol version supported by both
 The presence of this extension indicates whether or not the client or server implementation supports UDP. There is no payload.
 
 ### `0x02` - Password Authentication
-This extension adds password-based authentication to Wisp. A payload is required for this feature.
+This extension adds password-based authentication to Wisp. A payload is required for this feature. The presence of this extension indicates that the server allows username/password authentication.
 
 Once the server receives the username and password sent by the client, it will check if these credentials match. If they do, the connection will proceed as normal, but if they do not, the connection will be closed by sending a CLOSE packet with a reason of `0xc0`, then closing the underlying websocket.
 
 #### Server Message
-The server does not need to send a payload for this feature. The presence of this extension indicates that a username and password is required.
+| Field Name      | Field Type | Notes                                                  |
+|-----------------|------------|--------------------------------------------------------|
+| Required        | `uint8_t`  | A boolean that specifies if password auth is required. |
 
 #### Client Message
 | Field Name      | Field Type | Notes                                    |
@@ -134,7 +137,7 @@ The server does not need to send a payload for this feature. The presence of thi
 | Password String | `char[]`   | A UTF-8 encoded string for the password. |
 
 ### `0x03` - Public/Private Key Authentication
-This extension adds public/private key authentication to Wisp. A payload is required for this feature. The presence of this extension on the server message means that the server allows the usage of key authentication. 
+This extension adds public/private key authentication to Wisp. A payload is required for this feature. The presence of this extension on the server message means that the server allows the usage of key authentication.
 
 During the handshake, the server sends a list of supported signature algorithms and a challenge which consists of random bytes. The length of the challenge may vary, but it should be around 512 bits. 
 
@@ -147,6 +150,7 @@ Currently, the only supported signature algorithm is Ed25519, and this is repres
 #### Server Message
 | Field Name           | Field Type | Notes                                                                                                 |
 |----------------------|------------|-------------------------------------------------------------------------------------------------------|
+| Required             | `uint8_t`  | A boolean that specifies if public/private key authentication is required.                            |
 | Supported Algorithms | `uint8_t`  | A bit mask representing a list of signature algorithms supported by the server.                       |
 | Challenge Data       | `char[]`   | The randomly generated challenge data. The length of this may vary and fills the rest of the payload. |
 
@@ -168,8 +172,8 @@ This extension allows the server to specify a MOTD (a welcome message) to the cl
 ### Client Message
 The client does not need to send a payload.
 
-### Note on Authentication Behavior:
-When both extensions for password and key authentication are sent by the server, the client must assume that authentication is required but may pick which method to use. In the client message, the client only provides one response for the selected authentication method. If only a single extension for password or key authentication is sent by the server, it means that authentication is mandatory with that method only. If the server does not send any extensions for authentication, it means that no authentication is required at all.
+### Note on Authentication Behavior
+On the server message for each extension for authentication, there is a field that indicates whether or not that particular auth method is required. If no authentication methods are required, or if the extensions for authentication are not present on the server, the client will assume authentication is optional. If either key or password auth is required, the client must prompt the user for their credentials. If both methods are indicated to be required, the client may choose which one to use. 
 
 ## HTTP Behavior
 Since the entire protocol takes place over websockets, a few rules need to be in place to ensure that an HTTP connection can be upgraded successfully.
@@ -190,12 +194,12 @@ It is up to the server implementation to interpret the prefix. It may be ignored
 The client must establish the connection by performing a standard websocket handshake. The `Sec-WebSocket-Protocol` header does not need to be set.
 
 ### Handshake Steps
-Immediately after a websocket connection is established, the server must send a CONTINUE packet containing the initial buffer size for each stream. The stream ID for this packet must be set to 0. 
+Immediately after a websocket connection is established, the server must send an INFO packet containing information about the server itself. This includes information about the latest supported Wisp version and a list of supported protocols. Immediately afterwards, the server must send a CONTINUE packet containing the initial buffer size for each stream. The stream ID for this packet must be set to 0. 
 
-After the initial CONTINUE packet is sent, the server must send an INFO packet containing information about the server itself. This includes information about the latest supported Wisp version and a list of supported protocols.
+The client must wait for the CONTINUE packet to be received from the server for any communications to continue. If it receives the INFO packet first, it must use version 2 of the protocol. If it receives the CONTINUE packet first, it must use version 1 of the protocol. After it has received an INFO packet from the server, the client must then send an INFO packet to the server describing itself and the extensions it supports.
 
-The client must wait for the CONTINUE packet and the server's INFO packet to be received before beginning any communications. The client must then send an INFO packet to the server describing itself and the extensions it supports.
+While the server waits for an INFO packet from the client, it must assume the client is using version 1 of the protocol. After it receives the INFO packet from the client, it will assume version 2 of the protocol is used, and it must validate that the extensions are compatible.
 
-If either side does not send an INFO packet within 5 seconds, the connection may still proceed, but version 1 of the protocol is used. If there are any other critical compatibility issues detected by either party during the handshake, the connection should be immediately closed with a CLOSE packet with reason `0x04` and a stream ID of 0.
+If there are any critical compatibility issues detected by either party during the handshake, the connection should be immediately closed with a CLOSE packet with reason `0x04` and a stream ID of 0. 
 
 After these steps have been performed, regular communications can begin between the client and server. Only extensions that both sides support may be used.
