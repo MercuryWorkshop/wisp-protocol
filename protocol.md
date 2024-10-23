@@ -1,6 +1,6 @@
 # Wisp - A Lightweight Multiplexing Websocket Proxy Protocol
 
-Version 2.0, draft 4 - written by [@ading2210](https://github.com/ading2210)
+Version 2.0, draft 5 - written by [@ading2210](https://github.com/ading2210)
 
 > [!WARNING]
 > This version of the protocol is still a draft. Do not use it in production.
@@ -141,7 +141,7 @@ This extension adds public/private key authentication to Wisp. A payload is requ
 
 During the handshake, the server sends a list of supported signature algorithms and a challenge which consists of random bytes. The length of the challenge may vary, but it should be around 512 bits. 
 
-When the client receives this, it will select an algorithm to use, and sign the provided challenge using its private key. The client then sends back the SHA-512 hash of the public key which corresponds to the private key used, as well as the signature. 
+When the client receives this, it will select an algorithm to use, and sign the provided challenge using its private key. The client then sends back the SHA-256 hash of the public key which corresponds to the private key used, as well as the signature. 
 
 When the server receives the response from the client, it must verify the signature using the the public keys it has stored. If the verification is successful for one of the public keys allowed by the server, no more action is needed. If it fails for all of them, the connection must be closed immediately by sending a CLOSE packet with a reason of `0xc1`, then closing the underlying websocket.
 
@@ -158,7 +158,7 @@ Currently, the only supported signature algorithm is Ed25519, and this is repres
 | Field Name          | Field Type | Notes                                                                                                   |
 |---------------------|------------|---------------------------------------------------------------------------------------------------------|
 | Selected Algorithm  | `uint8_t`  | A bit mask representing the signature algorithm that was selected by the client.                        |
-| Public Key Hash     | `char[64]` | A SHA-512 hash of the public key used. This is always 64 bytes long.                                    |
+| Public Key Hash     | `char[32]` | A SHA-256 hash of the public key used. This is always 64 bytes long.                                    |
 | Challenge Signature | `char[]`   | A cryptographic signature generated using the client's private key. This fills the rest of the payload. |
 
 ### `0x04` - Server MOTD
@@ -191,7 +191,7 @@ Meanwhile a Wisp endpoint would look like this: `ws://example.com/customprefix/`
 It is up to the server implementation to interpret the prefix. It may be ignored, or used for gatekeeping in order to establish basic password-based authentication.
 
 ### Establishing a Websocket Connection
-The client must establish the connection by performing a standard websocket handshake. The `Sec-WebSocket-Protocol` header does not need to be set.
+The client must establish the connection by performing a standard websocket handshake. The `Sec-WebSocket-Protocol` request header must be present, but the value of the header is unspecified. When the server receives the websocket upgrade request, it must only use Wisp v2 if the `Sec-WebSocket-Protocol` header is present, otherwise must act like a Wisp v1 server. This section does not apply if the underlying network transport is not a websocket.
 
 ### Handshake Steps
 Immediately after a websocket connection is established, the server must send an INFO packet containing information about the server itself. This includes information about the latest supported Wisp version and a list of supported protocols. Immediately afterwards, the server must send a CONTINUE packet containing the initial buffer size for each stream. The stream ID for this packet must be set to 0. 

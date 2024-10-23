@@ -20,6 +20,8 @@ For the protocol specifications, see [`protocol.md`](https://github.com/MercuryW
 - [Ultraviolet](https://github.com/titaniumnetwork-dev/Ultraviolet) - A sophisticated web proxy, which uses either libcurl.js or epoxy. 
 - [Scramjet](https://github.com/MercuryWorkshop/scramjet) - An experimental web proxy that aims to be the successor to Ultraviolet.
 - [Whisper](https://github.com/MercuryWorkshop/Whisper) - A client for Wisp that exposes the connection over a TUN device.
+- [v86](https://github.com/copy/v86) - x86 PC emulator and x86-to-wasm JIT, running in the browser
+- [Puter](https://github.com/HeyPuter/puter/) - An advanced, open-source internet operating system designed to be feature-rich, exceptionally fast, and highly extensible
 
 ## Copyright:
 This repository is licensed under the [Creative Commons Attribution 4.0 International](https://github.com/MercuryWorkshop/wisp-protocol/blob/main/LICENSE) license. The implementations listed above use different licenses.
