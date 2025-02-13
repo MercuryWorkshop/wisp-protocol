@@ -8,13 +8,14 @@ For the protocol specifications, see [`protocol.md`](https://github.com/MercuryW
 - **[wisp-server-node](https://github.com/MercuryWorkshop/wisp-server-node)** - by [@ProgrammerIn-wonderland](https://github.com/ProgrammerIn-wonderland)
 - [wisp-js](https://github.com/MercuryWorkshop/wisp-client-js/tree/rewrite) - by [@ading2210](https://github.com/ading2210)
 - [epoxy-server](https://github.com/MercuryWorkshop/epoxy-tls/tree/multiplexed/server) (Rust) - by [@r58Playz](https://github.com/r58Playz)
-- [WispServerCpp](https://github.com/FoxMoss/WispServerCpp) - by [@FoxMoss](https://github.com/FoxMoss)
+- [Woeful](https://github.com/MercuryWorkshop/woeful) (C++) - by [@FoxMoss](https://github.com/MercuryWorkshop/woeful)
 
 ## Client Implementations:
 - **[wisp-client-js](https://github.com/MercuryWorkshop/wisp-client-js)** - by [@ading2210](https://github.com/ading2210)
 - [wisp-mux](https://crates.io/crates/wisp-mux) (Rust) - by [@r58Playz](https://github.com/r58Playz)
 
 ## Software Using Wisp:
+- [WispMark](https://github.com/MercuryWorkshop/wispmark) - A benchmarking tool for Wisp protocol implementations.
 - [libcurl.js](https://github.com/ading2210/libcurl.js) - A port of libcurl to WebAssembly, for proxying HTTPS requests from the browser with full TLS encryption
 - [epoxy-tls](https://github.com/MercuryWorkshop/epoxy-tls) - An encrypted proxy for browser javascript, written in Rust.
 - [Ultraviolet](https://github.com/titaniumnetwork-dev/Ultraviolet) - A sophisticated web proxy, which uses either libcurl.js or epoxy. 

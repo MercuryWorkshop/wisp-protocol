@@ -1,6 +1,6 @@
 # Wisp - A Lightweight Multiplexing Websocket Proxy Protocol
 
-Version 2.0, draft 5 - written by [@ading2210](https://github.com/ading2210)
+Version 2.0, draft 6 - written by [@ading2210](https://github.com/ading2210)
 
 > [!WARNING]
 > This version of the protocol is still a draft. Do not use it in production.
@@ -15,7 +15,9 @@ Wisp is designed to be a low-overhead, easy to implement protocol for proxying m
 | Stream ID   | `uint32_t` | Random stream ID assigned by the client.      |
 | Payload     | `char[]`   | Payload takes up the rest of the packet.      |
 
-Every packet must follow this format regardless of the type. Note that all data types are little-endian. Additionally, the stream ID of 0 is reserved for the initial handshake and must not be used elsewhere.
+Every packet must follow this format regardless of the type. Note that all data types are little-endian.  Whenever there is a string field in a packet, that string is never null-terminated.
+
+Additionally, the stream ID of 0 is reserved for the initial handshake and must not be used elsewhere.
 
 ## Packet Types
 Each packet type has a different format for the payload, which is detailed below.
@@ -132,7 +134,6 @@ Once the server receives the username and password sent by the client, it will c
 | Field Name      | Field Type | Notes                                    |
 |-----------------|------------|------------------------------------------|
 | Username Length | `uint8_t`  | The length of the username string.       |
-| Password Length | `uint16_t` | The length of the password string.       |
 | Username String | `char[]`   | A UTF-8 encoded string for the username. |
 | Password String | `char[]`   | A UTF-8 encoded string for the password. |
 
@@ -169,6 +170,11 @@ This extension allows the server to specify a MOTD (a welcome message) to the cl
 |-------------|------------|-------------------------------------|
 | MOTD String | `char[]`   | A UTF-8 string containing the MOTD. |
 
+### `0x05` - Stream Open Confirmation
+The presence of this extension indications that stream open confirmations are supported. There is no payload. 
+
+After a stream has been opened successfully on the server (that is, the underlying TCP socket is connected), the server must send a CONTINUE packet corresponding to that stream. The client can wait for this confirmation packet before sending data, but does not need to. The purpose of this is so that the client can know for certain whether or not the underlying socket has been opened before beginning to send data. Keep in mind that if the client decides to wait, this incurs a latency penalty. 
+
 ### Client Message
 The client does not need to send a payload.
 
@@ -191,15 +197,15 @@ Meanwhile a Wisp endpoint would look like this: `ws://example.com/customprefix/`
 It is up to the server implementation to interpret the prefix. It may be ignored, or used for gatekeeping in order to establish basic password-based authentication.
 
 ### Establishing a Websocket Connection
-The client must establish the connection by performing a standard websocket handshake. The `Sec-WebSocket-Protocol` request header must be present, but the value of the header is unspecified. When the server receives the websocket upgrade request, it must only use Wisp v2 if the `Sec-WebSocket-Protocol` header is present, otherwise must act like a Wisp v1 server. This section does not apply if the underlying network transport is not a websocket.
+The client must establish the connection by performing a standard websocket handshake. The `Sec-WebSocket-Protocol` request header must be present, but the value of the header is unspecified. When the server receives the websocket upgrade request, it must only use Wisp v2 if the `Sec-WebSocket-Protocol` header is present, otherwise it must act like a Wisp v1 server. This section does not apply if the underlying network transport is not a websocket.
 
 ### Handshake Steps
-Immediately after a websocket connection is established, the server must send an INFO packet containing information about the server itself. This includes information about the latest supported Wisp version and a list of supported protocols. Immediately afterwards, the server must send a CONTINUE packet containing the initial buffer size for each stream. The stream ID for this packet must be set to 0. 
+Immediately after a websocket connection is established, the server must send an INFO packet containing information about the server itself. This includes information about the latest supported Wisp version and a list of supported protocols. 
 
-The client must wait for the CONTINUE packet to be received from the server for any communications to continue. If it receives the INFO packet first, it must use version 2 of the protocol. If it receives the CONTINUE packet first, it must use version 1 of the protocol. After it has received an INFO packet from the server, the client must then send an INFO packet to the server describing itself and the extensions it supports.
+After the client receives the INFO packet from the server, it must decide if the extensions are compatible, and if not, it may reject the connection at this stage. If the client chooses to reject the connection, it must send a CLOSE packet with the corresponding reason and a stream ID of 0 before closing the websocket. If the connection is to proceed, the client must send an INFO packet describing itself and the supported protocols. If the client chooses to authenticate itself, the credentials will be sent here. 
 
-While the server waits for an INFO packet from the client, it must assume the client is using version 1 of the protocol. After it receives the INFO packet from the client, it will assume version 2 of the protocol is used, and it must validate that the extensions are compatible.
+If the client instead receives a CONTINUE packet first, version 1 of the protocol must be used, and the rest of these steps no longer apply.
 
-If there are any critical compatibility issues detected by either party during the handshake, the connection should be immediately closed with a CLOSE packet with reason `0x04` and a stream ID of 0. 
+When the server receives the client's INFO packet, it will either accept or reject the connection. If the connection is accepted, it must send a CONTINUE packet containing the initial buffer size for each stream. The stream ID for this packet must be set to 0. If the connection is rejected, for example due to a compatibility issue or rejected authentication, a CLOSE packet with the corresponding reason must be sent with a stream ID of 0, before the websocket is closed.
 
-After these steps have been performed, regular communications can begin between the client and server. Only extensions that both sides support may be used.
+The client must wait for the CONTINUE or CLOSE packet to be received from the server. After these steps have been performed, regular communications can begin between the client and server. Only extensions that both sides support may be used.
