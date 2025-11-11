@@ -16,6 +16,7 @@ For the protocol specifications, see [`protocol.md`](https://github.com/MercuryW
 
 ## Software Using Wisp:
 - [WispMark](https://github.com/MercuryWorkshop/wispmark) - A benchmarking tool for Wisp protocol implementations.
+- [Mittens](https://github.com/scaratech/mittens) - Programmable middleware that works with any Wisp implementation.
 - [libcurl.js](https://github.com/ading2210/libcurl.js) - A port of libcurl to WebAssembly, for proxying HTTPS requests from the browser with full TLS encryption
 - [epoxy-tls](https://github.com/MercuryWorkshop/epoxy-tls) - An encrypted proxy for browser javascript, written in Rust.
 - [Ultraviolet](https://github.com/titaniumnetwork-dev/Ultraviolet) - A sophisticated web proxy, which uses either libcurl.js or epoxy. 
