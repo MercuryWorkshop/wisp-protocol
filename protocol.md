@@ -1,9 +1,6 @@
 # Wisp - A Lightweight Multiplexing Websocket Proxy Protocol
 
-Version 2.0, draft 6 - written by [@ading2210](https://github.com/ading2210)
-
-> [!WARNING]
-> This version of the protocol is still a draft. Do not use it in production.
+Version 2.1 - written by [@ading2210](https://github.com/ading2210)
 
 ## About
 Wisp is designed to be a low-overhead, easy to implement protocol for proxying multiple TCP/UDP sockets over a single websocket connection. Wisp is simpler and has better error handling abilities compared to alternatives such as penguin-rs.
@@ -15,7 +12,7 @@ Wisp is designed to be a low-overhead, easy to implement protocol for proxying m
 | Stream ID   | `uint32_t` | Random stream ID assigned by the client.      |
 | Payload     | `char[]`   | Payload takes up the rest of the packet.      |
 
-Every packet must follow this format regardless of the type. Note that all data types are little-endian.  Whenever there is a string field in a packet, that string is never null-terminated.
+Every packet must follow this format regardless of the type. Note that all data types are little-endian. Whenever there is a string field in a packet, that string is never null-terminated.
 
 Additionally, the stream ID of 0 is reserved for the initial handshake and must not be used elsewhere.
 
@@ -131,11 +128,11 @@ Once the server receives the username and password sent by the client, it will c
 | Required        | `uint8_t`  | A boolean that specifies if password auth is required. |
 
 #### Client Message
-| Field Name      | Field Type | Notes                                    |
-|-----------------|------------|------------------------------------------|
-| Username Length | `uint8_t`  | The length of the username string.       |
-| Username String | `char[]`   | A UTF-8 encoded string for the username. |
-| Password String | `char[]`   | A UTF-8 encoded string for the password. |
+| Field Name      | Field Type | Notes                                                                       |
+|-----------------|------------|-----------------------------------------------------------------------------|
+| Username Length | `uint8_t`  | The length of the username string.                                          |
+| Username String | `char[]`   | A UTF-8 encoded string for the username.                                    |
+| Password String | `char[]`   | A UTF-8 encoded string for the password. This fills the rest of the payload |
 
 ### `0x03` - Public/Private Key Authentication
 This extension adds public/private key authentication to Wisp. A payload is required for this feature. The presence of this extension on the server message means that the server allows the usage of key authentication.
@@ -158,14 +155,16 @@ Currently, the only supported signature algorithm is Ed25519, and this is repres
 #### Client Message
 | Field Name          | Field Type | Notes                                                                                                   |
 |---------------------|------------|---------------------------------------------------------------------------------------------------------|
+| Username Length     | `uint8_t`  | The length of the username string.                                                                      |
+| Username String     | `char[]`   | A UTF-8 encoded string for the username.                                                                |
 | Selected Algorithm  | `uint8_t`  | A bit mask representing the signature algorithm that was selected by the client.                        |
-| Public Key Hash     | `char[32]` | A SHA-256 hash of the public key used. This is always 64 bytes long.                                    |
+| Public Key Hash     | `char[32]` | A SHA-256 hash of the public key used. This is always 32 bytes long.                                    |
 | Challenge Signature | `char[]`   | A cryptographic signature generated using the client's private key. This fills the rest of the payload. |
 
 ### `0x04` - Server MOTD
-This extension allows the server to specify a MOTD (a welcome message) to the client. The client can then display this message to the user. The purpose of this is to provide a mechanism for the server to make the user aware of any limitations imposed on the client, such as rate limits and block lists, as well other info.
+This extension allows the server to specify a MOTD (a welcome message) to the client. The client can then display this message to the user. The purpose of this is to provide a mechanism for the server to make the user aware of any limitations imposed on the client, such as rate limits and block lists, as well other info. There is no client payload.
 
-### Server Message
+#### Server Message
 | Field Name  | Field Type | Notes                               |
 |-------------|------------|-------------------------------------|
 | MOTD String | `char[]`   | A UTF-8 string containing the MOTD. |
@@ -173,16 +172,13 @@ This extension allows the server to specify a MOTD (a welcome message) to the cl
 ### `0x05` - Stream Open Confirmation
 The presence of this extension indications that stream open confirmations are supported. There is no payload. 
 
-After a stream has been opened successfully on the server (that is, the underlying TCP socket is connected), the server must send a CONTINUE packet corresponding to that stream. The client can wait for this confirmation packet before sending data, but does not need to. The purpose of this is so that the client can know for certain whether or not the underlying socket has been opened before beginning to send data. Keep in mind that if the client decides to wait, this incurs a latency penalty. 
-
-### Client Message
-The client does not need to send a payload.
+If the extension is present on both the server and the client, after a stream has been opened successfully on the server (that is, the underlying TCP socket is connected), the server must send a CONTINUE packet corresponding to that stream. The client can wait for this confirmation packet before sending data, but does not need to. The purpose of this is so that the client can know for certain whether or not the underlying socket has been opened successfully before beginning to send data. Keep in mind that if the client decides to wait, this incurs a latency penalty. 
 
 ### Note on Authentication Behavior
 On the server message for each extension for authentication, there is a field that indicates whether or not that particular auth method is required. If no authentication methods are required, or if the extensions for authentication are not present on the server, the client will assume authentication is optional. If either key or password auth is required, the client must prompt the user for their credentials. If both methods are indicated to be required, the client may choose which one to use. 
 
 ## HTTP Behavior
-Since the entire protocol takes place over websockets, a few rules need to be in place to ensure that an HTTP connection can be upgraded successfully.
+Since the entire protocol normally takes place over websockets, a few rules need to be in place to ensure that an HTTP connection can be upgraded successfully.
 
 ### Server Architecture
 The server must consist of a HTTP and websocket server that conforms to the respective standards.
