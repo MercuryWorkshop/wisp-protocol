@@ -1,7 +1,7 @@
 # Wisp Protocol
-Wisp is designed to be a low-overhead, easy to implement protocol for proxying multiple TCP/UDP sockets over a single websocket connection.
+Wisp is designed to be a low-overhead, easy to implement protocol for proxying multiple TCP and UDP sockets over a single websocket connection.
 
-For the protocol specifications, see [`protocol.md`](https://github.com/MercuryWorkshop/wisp-protocol/blob/main/protocol.md).
+For the protocol specifications, see [`protocol.md`](https://github.com/MercuryWorkshop/wisp-protocol/blob/v2/protocol.md).
 
 ## Major Versions:
 There are two major versions of Wisp:
@@ -13,18 +13,18 @@ There are two major versions of Wisp:
 - **[wisp-js/server](https://github.com/MercuryWorkshop/wisp-js)** - by [@ading2210](https://github.com/ading2210)
 - [epoxy-server](https://github.com/MercuryWorkshop/epoxy-tls/tree/multiplexed/server) (Rust) - by [@r58Playz](https://github.com/r58Playz)
 - [Woeful](https://github.com/MercuryWorkshop/Woeful) (C++) - by [@FoxMoss](https://github.com/FoxMoss)
-- [mrrowisp](https://github.com/starlightdevgroup/mrrowisp) (Go) - by [@soap-phia](https://github.com/starlightdevgroup/mrrowisp)
+- [mrrowisp](https://github.com/starlightdevgroup/mrrowisp) (Go) - by [@soap-phia](https://github.com/soap-phia)
 
 ## Client Implementations:
 - **[wisp-js/client](https://github.com/MercuryWorkshop/wisp-js)** - by [@ading2210](https://github.com/ading2210)
 - [wisp-mux](https://crates.io/crates/wisp-mux) (Rust) - by [@r58Playz](https://github.com/r58Playz)
-- [pixie](https://github.com/soap-phia/pixie) (Go) - by [@soap-phia](https://github.com/starlightdevgroup/mrrowisp)
+- [pixie](https://github.com/soap-phia/pixie) (Go) - by [@soap-phia](https://github.com/soap-phia)
 
 ## Software Using Wisp:
 - [WispMark](https://github.com/MercuryWorkshop/wispmark) - A benchmarking tool for Wisp protocol implementations.
-- [Mittens](https://github.com/scaratech/mittens) - Programmable middleware that works with any Wisp implementation.
 - [libcurl.js](https://github.com/ading2210/libcurl.js) - A port of libcurl to WebAssembly, for proxying HTTPS requests from the browser with full TLS encryption
 - [epoxy-tls](https://github.com/MercuryWorkshop/epoxy-tls) - An encrypted proxy for browser javascript, written in Rust.
+- [Mittens](https://github.com/scaratech/mittens) - Programmable middleware that works with any Wisp implementation.
 - [Ultraviolet](https://github.com/titaniumnetwork-dev/Ultraviolet) - A sophisticated web proxy, which uses either libcurl.js or epoxy. 
 - [Scramjet](https://github.com/MercuryWorkshop/scramjet) - An experimental web proxy that aims to be the successor to Ultraviolet.
 - [Whisper](https://github.com/MercuryWorkshop/Whisper) - A client for Wisp that exposes the connection over a TUN device.
