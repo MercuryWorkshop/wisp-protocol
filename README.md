@@ -1,17 +1,24 @@
 # Wisp Protocol
-Wisp is designed to be a low-overhead, easy to implement protocol for proxying multiple TCP sockets over a single websocket connection.
+Wisp is designed to be a low-overhead, easy to implement protocol for proxying multiple TCP/UDP sockets over a single websocket connection.
 
 For the protocol specifications, see [`protocol.md`](https://github.com/MercuryWorkshop/wisp-protocol/blob/main/protocol.md).
+
+## Major Versions:
+There are two major versions of Wisp:
+- [Wisp V1](https://github.com/MercuryWorkshop/wisp-protocol/blob/v1/protocol.md) - The simpler version which is easier to implement, but without advanced features such as authentication.
+- [Wisp V2](https://github.com/MercuryWorkshop/wisp-protocol/blob/v2/protocol.md) - Adds a handshake step which allows for adding protocol extensions, password and key authentication, MOTD messages, and more. 
 
 ## Server Implementations:
 - **[wisp-server-python](https://github.com/MercuryWorkshop/wisp-server-python)** - by [@ading2210](https://github.com/ading2210)
 - **[wisp-js/server](https://github.com/MercuryWorkshop/wisp-js)** - by [@ading2210](https://github.com/ading2210)
 - [epoxy-server](https://github.com/MercuryWorkshop/epoxy-tls/tree/multiplexed/server) (Rust) - by [@r58Playz](https://github.com/r58Playz)
 - [Woeful](https://github.com/MercuryWorkshop/Woeful) (C++) - by [@FoxMoss](https://github.com/FoxMoss)
+- [mrrowisp](https://github.com/starlightdevgroup/mrrowisp) (Go) - by [@soap-phia](https://github.com/starlightdevgroup/mrrowisp)
 
 ## Client Implementations:
 - **[wisp-js/client](https://github.com/MercuryWorkshop/wisp-js)** - by [@ading2210](https://github.com/ading2210)
 - [wisp-mux](https://crates.io/crates/wisp-mux) (Rust) - by [@r58Playz](https://github.com/r58Playz)
+- [pixie](https://github.com/soap-phia/pixie) (Go) - by [@soap-phia](https://github.com/starlightdevgroup/mrrowisp)
 
 ## Software Using Wisp:
 - [WispMark](https://github.com/MercuryWorkshop/wispmark) - A benchmarking tool for Wisp protocol implementations.
@@ -23,6 +30,8 @@ For the protocol specifications, see [`protocol.md`](https://github.com/MercuryW
 - [Whisper](https://github.com/MercuryWorkshop/Whisper) - A client for Wisp that exposes the connection over a TUN device.
 - [v86](https://github.com/copy/v86) - x86 PC emulator and x86-to-wasm JIT, running in the browser
 - [Puter](https://github.com/HeyPuter/puter/) - An advanced, open-source internet operating system designed to be feature-rich, exceptionally fast, and highly extensible
+- [browser.js](https://github.com/HeyPuter/browser.js) - A browser environment for the web, based on Scramjet.
+- [Wispcraft](https://github.com/MercuryWorkshop/wispcraft) - A mod for Eaglercraft, letting you play on online Minecraft Java Edition servers in your browser. 
 
 ## Copyright:
 This repository is licensed under the [Creative Commons Attribution 4.0 International](https://github.com/MercuryWorkshop/wisp-protocol/blob/main/LICENSE) license. The implementations listed above use different licenses.
