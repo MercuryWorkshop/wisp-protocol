@@ -13,7 +13,7 @@ There are two major versions of Wisp:
 - **[wisp-js/server](https://github.com/MercuryWorkshop/wisp-js)** - by [@ading2210](https://github.com/ading2210)
 - [epoxy-server](https://github.com/MercuryWorkshop/epoxy-tls/tree/multiplexed/server) (Rust) - by [@r58Playz](https://github.com/r58Playz)
 - [Woeful](https://github.com/MercuryWorkshop/Woeful) (C++) - by [@FoxMoss](https://github.com/FoxMoss)
-- [mrrowisp](https://github.com/starlightdevgroup/mrrowisp) (Go) - by [@soap-phia](https://github.com/soap-phia)
+- [mrrowisp](https://github.com/soap-phia/mrrowisp) (Go) - by [@soap-phia](https://github.com/soap-phia)
 
 ## Client Implementations:
 - **[wisp-js/client](https://github.com/MercuryWorkshop/wisp-js)** - by [@ading2210](https://github.com/ading2210)
