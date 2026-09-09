@@ -24,7 +24,7 @@ There are two major versions of Wisp:
 - [WispMark](https://github.com/MercuryWorkshop/wispmark) - A benchmarking tool for Wisp protocol implementations.
 - [libcurl.js](https://github.com/ading2210/libcurl.js) - A port of libcurl to WebAssembly, for proxying HTTPS requests from the browser with full TLS encryption
 - [epoxy-tls](https://github.com/MercuryWorkshop/epoxy-tls) - An encrypted proxy for browser javascript, written in Rust.
-- [Mittens](https://github.com/scaratech/mittens) - Programmable middleware that works with any Wisp implementation.
+- [Wasmer SDK](https://github.com/wasmerio/wasmer-sdk) - A WebAssembly sandbox based on WASIX that runs software from the Wasmer registry. 
 - [Ultraviolet](https://github.com/titaniumnetwork-dev/Ultraviolet) - A sophisticated web proxy, which uses either libcurl.js or epoxy. 
 - [Scramjet](https://github.com/MercuryWorkshop/scramjet) - An experimental web proxy that aims to be the successor to Ultraviolet.
 - [Whisper](https://github.com/MercuryWorkshop/Whisper) - A client for Wisp that exposes the connection over a TUN device.
@@ -32,6 +32,7 @@ There are two major versions of Wisp:
 - [Puter](https://github.com/HeyPuter/puter/) - An advanced, open-source internet operating system designed to be feature-rich, exceptionally fast, and highly extensible
 - [browser.js](https://github.com/HeyPuter/browser.js) - A browser environment for the web, based on Scramjet.
 - [Wispcraft](https://github.com/MercuryWorkshop/wispcraft) - A mod for Eaglercraft, letting you play on online Minecraft Java Edition servers in your browser. 
+- [Firefox WASM](https://github.com/HeyPuter/firefox-wasm) - A port of the Gecko engine to WebAssembly so that Firefox can be loaded inside another browser
 
 ## Copyright:
 This repository is licensed under the [Creative Commons Attribution 4.0 International](https://github.com/MercuryWorkshop/wisp-protocol/blob/main/LICENSE) license. The implementations listed above use different licenses.
