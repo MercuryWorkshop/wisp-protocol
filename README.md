@@ -8,17 +8,20 @@ There are two major versions of Wisp:
 - [Wisp V1](https://github.com/MercuryWorkshop/wisp-protocol/blob/v1/protocol.md) - The simpler version which is easier to implement, but without advanced features such as authentication.
 - [Wisp V2](https://github.com/MercuryWorkshop/wisp-protocol/blob/v2/protocol.md) - Adds a handshake step which allows for adding protocol extensions, password and key authentication, MOTD messages, and more. 
 
-## Server Implementations:
-- **[wisp-server-python](https://github.com/MercuryWorkshop/wisp-server-python)** - by [@ading2210](https://github.com/ading2210)
-- **[wisp-js/server](https://github.com/MercuryWorkshop/wisp-js)** - by [@ading2210](https://github.com/ading2210)
-- [epoxy-server](https://github.com/MercuryWorkshop/epoxy-tls/tree/multiplexed/server) (Rust) - by [@r58Playz](https://github.com/r58Playz)
-- [Woeful](https://github.com/MercuryWorkshop/Woeful) (C++) - by [@FoxMoss](https://github.com/FoxMoss)
-- [mrrowisp](https://github.com/soap-phia/mrrowisp) (Go) - by [@soap-phia](https://github.com/soap-phia)
-
 ## Client Implementations:
-- **[wisp-js/client](https://github.com/MercuryWorkshop/wisp-js)** - by [@ading2210](https://github.com/ading2210)
+- **[wisp-js/client](https://github.com/MercuryWorkshop/wisp-js/tree/master/src/client)** - by [@ading2210](https://github.com/ading2210)
+- [epoxy-tls](https://github.com/MercuryWorkshop/epoxy-tls/tree/multiplexed/client) (Rust) - by [@r58Playz](https://github.com/r58Playz)
+
+## Server Implementations:
+- **[wisp-js/server](https://github.com/MercuryWorkshop/wisp-js/tree/master/src/server)** - by [@ading2210](https://github.com/ading2210)
+- **[epoxy-server](https://github.com/MercuryWorkshop/epoxy-tls/tree/multiplexed/server)** (Rust) - by [@r58Playz](https://github.com/r58Playz)
+- [wisp-server-python](https://github.com/MercuryWorkshop/wisp-server-python) - by [@ading2210](https://github.com/ading2210)
+- [wispurr](https://github.com/sylvieisnton/wispurr) (Go) - by [@soap-phia](https://github.com/soap-phia)
+- [Woeful](https://github.com/MercuryWorkshop/Woeful) (C++) - by [@FoxMoss](https://github.com/FoxMoss)
+
+## Library Implementations:
+- **[wisp-js](https://www.npmjs.com/package/@mercuryworkshop/wisp-js)** - by [@ading2210](https://github.com/ading2210)
 - [wisp-mux](https://crates.io/crates/wisp-mux) (Rust) - by [@r58Playz](https://github.com/r58Playz)
-- [pixie](https://github.com/soap-phia/pixie) (Go) - by [@soap-phia](https://github.com/soap-phia)
 
 ## Software Using Wisp:
 - [WispMark](https://github.com/MercuryWorkshop/wispmark) - A benchmarking tool for Wisp protocol implementations.
