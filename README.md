@@ -1,9 +1,16 @@
 # Wisp Protocol
 Wisp is designed to be a low-overhead, easy to implement protocol for proxying multiple TCP sockets over a single websocket connection.
 
-For the protocol specifications, see [`protocol.md`](https://github.com/MercuryWorkshop/wisp-protocol/blob/main/protocol.md).
+For the protocol specifications, see [`protocol.md`](https://github.com/MercuryWorkshop/wisp-protocol/blob/v1/protocol.md).
 
-## Server Implementations:
+For more info, including an updated list of software using Wisp, see the [Wisp V2 README](https://github.com/MercuryWorkshop/wisp-protocol/blob/v2/README.md).
+
+## Major Versions:
+There are two major versions of Wisp:
+- [Wisp V1](https://github.com/MercuryWorkshop/wisp-protocol/blob/v1/protocol.md) - The simpler version which is easier to implement, but without advanced features such as authentication.
+- [Wisp V2](https://github.com/MercuryWorkshop/wisp-protocol/blob/v2/protocol.md) - Adds a handshake step which allows for adding protocol extensions, password and key authentication, MOTD messages, and more. 
+
+# Server Implementations:
 - **[wisp-server-python](https://github.com/MercuryWorkshop/wisp-server-python)** - by [@ading2210](https://github.com/ading2210)
 - **[wisp-js/server](https://github.com/MercuryWorkshop/wisp-js)** - by [@ading2210](https://github.com/ading2210)
 - [epoxy-server](https://github.com/MercuryWorkshop/epoxy-tls/tree/multiplexed/server) (Rust) - by [@r58Playz](https://github.com/r58Playz)

@@ -28,7 +28,7 @@ Each packet type has a different format for the payload, which is detailed below
 #### Behavior
 The client needs to send a CONNECT packet to the server to create a new stream under the same websocket. The stream ID chosen by the client at this point will be associated with this stream for all future messages. When the server receives this packet, it must validate this information, and if the payload is invalid, a CLOSE packet must be sent.
 
-Once the payload has been validated, the server must immediately try to establish a TCP/UDP socket to the specified hostname and port. If this fails, the server must send a CLOSE packet with the reason. To reduce overall delay, the client can begin sending data before the any CONTINUE packet has been received from the server.
+Once the payload has been validated, the server must immediately try to establish a TCP/UDP socket to the specified hostname and port. If this fails, the server must send a CLOSE packet with the reason. To reduce overall delay, the client can begin sending data immediately after sending the CONNECT packet, without waiting for confirmation that the stream has been opened successfully. The client does not need to wait for a CONTINUE packet to begin sending data.
 
 The stream type field determines whether the connection uses TCP or UDP. `0x01` in this field means TCP, and `0x02` means UDP. UDP support is mandatory for both the server and the client.
 
