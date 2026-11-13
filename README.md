@@ -18,6 +18,7 @@ There are two major versions of Wisp:
 - [wisp-server-python](https://github.com/MercuryWorkshop/wisp-server-python) - by [@ading2210](https://github.com/ading2210)
 - [Woeful](https://github.com/MercuryWorkshop/Woeful) (C++) - by [@FoxMoss](https://github.com/FoxMoss)
 - [wisp-server-workers](https://github.com/MercuryWorkshop/wisp-server-workers) - by [@r58Playz](https://github.com/r58Playz)
+- [wispurr](https://github.com/sylvieisnton/wispurr) - by [@sylvieisnton](https://github.com/sylvieisnton)
 
 ## Library Implementations:
 - **[wisp-js](https://www.npmjs.com/package/@mercuryworkshop/wisp-js)** - by [@ading2210](https://github.com/ading2210)
